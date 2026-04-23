@@ -1,0 +1,136 @@
+// =======================
+// CLASS DOKTER
+// =======================
+class Dokter(
+    val nama: String,
+    kuotaAwal: Int
+) {
+    var kuotaHarian: Int = kuotaAwal
+        private set
+
+    fun kurangiKuota(): Boolean {
+        return if (kuotaHarian > 0) {
+            kuotaHarian--
+            true
+        } else {
+            false
+        }
+    }
+
+    fun info() {
+        println("Dokter: $nama | Sisa Kuota: $kuotaHarian")
+    }
+}
+
+// =======================
+// CLASS ANTRIAN
+// =======================
+class Antrian {
+    private var nomorTerakhir: Int = 0
+
+    fun ambilNomor(): Int {
+        nomorTerakhir++
+        return nomorTerakhir
+    }
+
+    fun info() {
+        println("Nomor antrian terakhir: $nomorTerakhir")
+    }
+}
+
+// =======================
+// CLASS PASIEN
+// =======================
+class Pasien(
+    val nama: String
+) {
+    var nomorAntrian: Int? = null
+        private set
+
+    var sudahDaftar: Boolean = false
+        private set
+
+    fun daftarBerobat(dokter: Dokter, antrian: Antrian) {
+        println("\n[AKSI] $nama mencoba mendaftar...")
+
+        // VALIDASI 1: Sudah daftar atau belum
+        if (sudahDaftar) {
+            println("❌ GAGAL: $nama sudah terdaftar sebelumnya!")
+            return
+        }
+
+        // VALIDASI 2: Kuota dokter
+        if (dokter.kuotaHarian <= 0) {
+            println("❌ GAGAL: Kuota dokter sudah habis!")
+            return
+        }
+
+        // PROSES BISNIS
+        val berhasil = dokter.kurangiKuota()
+
+        if (berhasil) {
+            nomorAntrian = antrian.ambilNomor()
+            sudahDaftar = true
+
+            println("✅ BERHASIL:")
+            println("   Nama           : $nama")
+            println("   Nomor Antrian  : $nomorAntrian")
+        } else {
+            println("❌ GAGAL: Sistem tidak dapat memproses!")
+        }
+    }
+
+    fun info() {
+        println("Pasien: $nama | Antrian: ${nomorAntrian ?: "-"} | Status: ${if (sudahDaftar) "Terdaftar" else "Belum"}")
+    }
+}
+
+// =======================
+// MAIN SIMULATION
+// =======================
+fun main() {
+
+    println("===== SISTEM E-KLINIK KAMPUS =====")
+
+    val dokter = Dokter("Dr. Andi", 2)
+    val antrian = Antrian()
+
+    val pasien1 = Pasien("Budi")
+    val pasien2 = Pasien("Siti")
+    val pasien3 = Pasien("Joko")
+
+    // ===== KONDISI AWAL =====
+    println("\n--- STATUS AWAL ---")
+    dokter.info()
+    antrian.info()
+
+    // ===== SIMULASI SUKSES =====
+    println("\n--- SIMULASI SUKSES ---")
+    pasien1.daftarBerobat(dokter, antrian)
+    pasien2.daftarBerobat(dokter, antrian)
+
+    // ===== STATUS SETELAH SUKSES =====
+    println("\n--- STATUS SETELAH PENDAFTARAN ---")
+    dokter.info()
+    antrian.info()
+
+    pasien1.info()
+    pasien2.info()
+
+    // ===== SIMULASI GAGAL (KUOTA HABIS) =====
+    println("\n--- SIMULASI GAGAL (KUOTA HABIS) ---")
+    pasien3.daftarBerobat(dokter, antrian)
+
+    // ===== SIMULASI GAGAL (DAFTAR 2X) =====
+    println("\n--- SIMULASI GAGAL (DOUBLE REGISTER) ---")
+    pasien1.daftarBerobat(dokter, antrian)
+
+    // ===== FINAL STATE =====
+    println("\n--- STATUS AKHIR ---")
+    dokter.info()
+    antrian.info()
+
+    pasien1.info()
+    pasien2.info()
+    pasien3.info()
+}
